@@ -1,0 +1,17 @@
+name: mvs
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - opencv
+  - matplotlib
+  - pydicom
+  - scikit-image
+  - scipy
+  - pillow
+  - imageio
+  - imageio-ffmpeg
+  - pip
+  - pip:
+      - fpdf2
