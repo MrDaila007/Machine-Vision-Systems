@@ -1,7 +1,7 @@
 # Graph Report - Machine_vision_systems  (2026-09-30)
 
 ## Corpus Check
-- 20 files · ~992,060 words
+- 20 files · ~992,109 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -9,14 +9,9 @@
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
-## Graph Freshness
-- Built from commit: `4ecd3070`
-- Run `git rev-parse HEAD` and compare to check if the graph is stale.
-- Run `graphify update .` after code changes (no API cost).
-
 ## Community Hubs (Navigation)
 - keypoints.py
-- Eliseev D.py
+- Фамилия.py
 - track_particles.py
 - optical_flow_tracker.py
 - correlation_filter.py
@@ -59,9 +54,9 @@
 Cohesion: 0.30
 Nodes (18): draw_points(), f1_score(), harris_points(), ink_bands(), load_gray(), main(), make_sheet(), match_queries() (+10 more)
 
-### Community 1 - "Eliseev D.py"
+### Community 1 - "Фамилия.py"
 Cohesion: 0.21
-Nodes (12): FPDF, gaussian_lowpass(), main(), notch_periodic(), ndarray, Path, Частотная и растровая фильтрация., Гасит полосу спектра вдоль самой яркой периодической помехи. Пик ищется в… (+4 more)
+Nodes (12): FPDF, gaussian_lowpass(), main(), notch_periodic(), ndarray, Path, Частотная и растровая фильтрация. Имя файла — плейсхолдер. Замените SURNAME на…, Гасит полосу спектра вдоль самой яркой периодической помехи. Пик ищется в… (+4 more)
 
 ### Community 2 - "track_particles.py"
 Cohesion: 0.23

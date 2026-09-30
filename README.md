@@ -20,7 +20,7 @@ conda activate mvs
 ```bash
 conda activate mvs
 cd Lab1 && python correlation_filter.py
-cd ../Lab2 && python Фамилия.py
+cd ../Lab2 && python "Eliseev D.py"
 cd ../Lab3 && python histogram.py
 cd ../Lab4 && python lines.py
 cd ../Lab5 && python keypoints.py
@@ -32,6 +32,6 @@ cd ../Lab9 && python optical_flow_tracker.py
 
 Видео `MKCell.mp4` длится около 150 секунд. Скрипты Lab8 и Lab9 обрабатывают его целиком в половинном разрешении, на это уходит несколько минут.
 
-В практике 2 имена кода и PDF — плейсхолдер `Фамилия`. Его нужно заменить на свою фамилию в константе `SURNAME` внутри `Lab2/Фамилия.py` и переименовать сам файл скрипта. PDF создаётся с тем же именем.
+В практике 2 код и PDF называются `Eliseev D`.
 
 Файл `boat2 (1).png` был точной копией `boat2.png` и в работу не входит.

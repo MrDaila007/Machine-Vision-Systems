@@ -4,6 +4,11 @@
     "ast_hash": "e4ccd29c895a4b477fff7b4b8bb63fc1",
     "semantic_hash": ""
   },
+  "Lab2/\u0424\u0430\u043c\u0438\u043b\u0438\u044f.py": {
+    "mtime": 1790787128.0460355,
+    "ast_hash": "a46f7e6a9b2457635fb2ad7cc91c8e9e",
+    "semantic_hash": ""
+  },
   "Lab3/histogram.py": {
     "mtime": 1790787108.5310407,
     "ast_hash": "d6b06b52409ab66a9e89d301e02b1742",
@@ -45,8 +50,8 @@
     "semantic_hash": ""
   },
   "Lab2/README.md": {
-    "mtime": 1790788566.737294,
-    "ast_hash": "4a8c2b191e6745ffb2124bc556c4b738",
+    "mtime": 1790787107.547041,
+    "ast_hash": "c30447c853851bac9d1fb1e09da0ab4a",
     "semantic_hash": ""
   },
   "Lab3/README.md": {
@@ -120,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1790788569.037299,
-    "ast_hash": "380686cd71021e5da0910c7bcb7b801e",
+    "mtime": 1790786629.635126,
+    "ast_hash": "75c49f3f71f631bc0fa2df8b6969f0be",
     "semantic_hash": ""
   },
   "environment.yml": {
@@ -132,6 +137,11 @@
   "tasks.md": {
     "mtime": 1790784816.0672328,
     "ast_hash": "3c27785b246cd58c79afe7b511cf5eb5",
+    "semantic_hash": ""
+  },
+  "Lab2/\u0424\u0430\u043c\u0438\u043b\u0438\u044f.pdf": {
+    "mtime": 1790787147.78103,
+    "ast_hash": "2db7d6ecc3a9c357fa3ea71973813ee6",
     "semantic_hash": ""
   },
   "Lab1/data/boat1.jpg": {
@@ -412,11 +422,6 @@
   "Lab9/output/flow_tracked.mp4": {
     "mtime": 1790788065.9426603,
     "ast_hash": "9df38bac7fa8ad34beb21d1237cbeefc",
-    "semantic_hash": ""
-  },
-  "Lab2/Eliseev D.py": {
-    "mtime": 1790788587.688338,
-    "ast_hash": "5acf7c975e806566c9ca9bcb8e9cc4ba",
     "semantic_hash": ""
   }
 }

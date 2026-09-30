@@ -1,15 +1,12 @@
-"""Частотная и растровая фильтрация.
-
-Имя файла — плейсхолдер. Замените SURNAME на свою фамилию и переименуйте
-этот скрипт и PDF-отчёт так же.
-"""
+"""Частотная и растровая фильтрация."""
 
 from pathlib import Path
 
 import cv2
 import numpy as np
 from fpdf import FPDF
-SURNAME = "Фамилия"
+
+SURNAME = "Eliseev D"
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
@@ -127,7 +124,7 @@ def main() -> None:
     pdf_path = ROOT / f"{SURNAME}.pdf"
     pdf = Report()
     pdf.add_page()
-    pdf.heading(f"Практика 2. Частотная фильтрация. {SURNAME}")
+    pdf.heading(f"Практика 2. Частотная фильтрация. {SURNAME}.")
     pdf.paragraph(
         "На sample6.jpg мелкие тёмные точки убраны двумя способами. "
         "Растровая фильтрация — морфологическое закрытие эллипсом 15×15: "
