@@ -1,16 +1,16 @@
-# Graph Report - Machine_vision_systems  (2026-10-01)
+# Graph Report - Machine_vision_systems  (2026-09-30)
 
 ## Corpus Check
-- 20 files · ~992,664 words
+- 20 files · ~992,060 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 167 nodes · 258 edges · 19 communities
+- 159 nodes · 244 edges · 19 communities
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `bb82102c`
+- Built from commit: `4ecd3070`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -37,15 +37,15 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `main()` - 9 edges
-2. `FlowTracker` - 8 edges
-3. `Report` - 7 edges
-4. `rotation_study()` - 7 edges
-5. `match_queries()` - 7 edges
-6. `main()` - 7 edges
-7. `main()` - 7 edges
-8. `Практика 5. Особые точки` - 7 edges
+2. `Report` - 7 edges
+3. `rotation_study()` - 7 edges
+4. `match_queries()` - 7 edges
+5. `Практика 5. Особые точки` - 7 edges
+6. `main()` - 6 edges
+7. `main()` - 6 edges
+8. `CentroidTracker` - 6 edges
 9. `main()` - 6 edges
-10. `main()` - 6 edges
+10. `FlowTracker` - 6 edges
 
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
@@ -64,12 +64,12 @@ Cohesion: 0.21
 Nodes (12): FPDF, gaussian_lowpass(), main(), notch_periodic(), ndarray, Path, Частотная и растровая фильтрация., Гасит полосу спектра вдоль самой яркой периодической помехи. Пик ищется в… (+4 more)
 
 ### Community 2 - "track_particles.py"
-Cohesion: 0.20
-Nodes (14): cell_body(), CentroidTracker, color_for(), detect_particles(), draw(), main(), nvenc_available(), open_writer() (+6 more)
+Cohesion: 0.23
+Nodes (12): cell_body(), CentroidTracker, color_for(), detect_particles(), draw(), main(), open_writer(), ndarray (+4 more)
 
 ### Community 3 - "optical_flow_tracker.py"
-Cohesion: 0.19
-Nodes (13): cell_body(), color_for(), detect_particles(), draw(), FlowTracker, main(), nvenc_available(), open_writer() (+5 more)
+Cohesion: 0.29
+Nodes (9): cell_body(), color_for(), detect_particles(), draw(), FlowTracker, main(), ndarray, Свой трекер частиц на оптическом потоке Лукаса–Канаде. (+1 more)
 
 ### Community 4 - "correlation_filter.py"
 Cohesion: 0.39
