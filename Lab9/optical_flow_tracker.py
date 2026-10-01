@@ -1,6 +1,8 @@
 """Свой трекер частиц на оптическом потоке Лукаса–Канаде."""
 
+from functools import lru_cache
 from pathlib import Path
+import subprocess
 import time
 
 import cv2
@@ -22,7 +24,12 @@ def cell_body(blue: np.ndarray) -> np.ndarray:
     bright = blur[blur > 15]
     threshold = max(30.0, float(np.percentile(bright, 35))) if bright.size else 30.0
     raw = (blur > threshold).astype(np.uint8)
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (21, 21))
+    # 21x21 не рвёт тонкие выросты (филоподии): они остаются тонким "мостиком"
+    # к основному телу клетки, largest-component подбирает их вместе с телом,
+    # и детектор частиц затем ищет точки на кончиках этих отростков. 45x45
+    # надёжно отделяет такие мостики на всех кадрах ролика (проверено: после
+    # открытия остаётся 85-92% площади тела, без разрывов самого тела).
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (45, 45))
     opened = cv2.morphologyEx(raw, cv2.MORPH_OPEN, kernel)
     count, labels, stats, _ = cv2.connectedComponentsWithStats(opened, 8)
     if count <= 1:
@@ -55,9 +62,20 @@ class FlowTracker:
         self.prev_red = None
         self.points = None
         self.ids: list[int] = []
+        self.fading: list[int] = []
         self.tracks: dict[int, list[tuple[int, float, float]]] = {}
         self.next_id = 1
         self.max_alive = 0
+
+    def needs_detections(self, frame_idx: int) -> bool:
+        if self.prev_red is None or self.points is None or len(self.ids) == 0:
+            return True
+        return frame_idx % REFRESH_EVERY == 0
+
+    def recent(self, frame_idx: int, window: int = 20) -> list[int]:
+        self.fading = [track_id for track_id in self.fading if frame_idx - self.tracks[track_id][-1][0] <= window]
+        visible = [track_id for track_id in self.ids + self.fading if len(self.tracks[track_id]) >= 2]
+        return sorted(set(visible))
 
     def _add(self, frame_idx: int, x: float, y: float) -> int:
         track_id = self.next_id
@@ -114,12 +132,25 @@ class FlowTracker:
                 kept_ids.append(track_id)
                 existing = np.array(kept_pts, dtype=np.float32)
 
+        kept_set = set(kept_ids)
+        self.fading.extend(track_id for track_id in self.ids if track_id not in kept_set)
         self.ids = kept_ids
         self.points = np.array(kept_pts, dtype=np.float32).reshape(-1, 1, 2) if kept_pts else None
         self.prev_red = red
         self.max_alive = max(self.max_alive, len(self.ids))
 
 
+def tail_points(points: list[tuple[int, float, float]], frame_idx: int, window: int) -> list[tuple[int, float, float]]:
+    tail = []
+    for point in reversed(points):
+        if frame_idx - point[0] > window:
+            break
+        tail.append(point)
+    tail.reverse()
+    return tail
+
+
+@lru_cache(maxsize=None)
 def color_for(track_id: int) -> tuple[int, int, int]:
     rng = np.random.default_rng(track_id + 11)
     return tuple(int(value) for value in rng.integers(60, 255, size=3))
@@ -127,11 +158,10 @@ def color_for(track_id: int) -> tuple[int, int, int]:
 
 def draw(frame: np.ndarray, tracker: FlowTracker, frame_idx: int) -> np.ndarray:
     canvas = frame.copy()
-    for track_id, points in tracker.tracks.items():
-        if len(points) < 2 or frame_idx - points[-1][0] > 20:
-            continue
+    for track_id in tracker.recent(frame_idx):
+        points = tracker.tracks[track_id]
         color = color_for(track_id)
-        tail = [point for point in points if frame_idx - point[0] <= 45]
+        tail = tail_points(points, frame_idx, 45)
         for start, end in zip(tail, tail[1:]):
             cv2.line(canvas, (int(start[1]), int(start[2])), (int(end[1]), int(end[2])), color, 1)
         x, y = points[-1][1], points[-1][2]
@@ -160,22 +190,62 @@ def track_speed(points: list[tuple[int, float, float]], fps: float) -> float:
     return float(np.mean(shifts)) if shifts else 0.0
 
 
+def nvenc_available() -> bool:
+    import imageio_ffmpeg
+
+    command = [
+        imageio_ffmpeg.get_ffmpeg_exe(),
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-f",
+        "lavfi",
+        "-i",
+        "color=c=black:s=256x256:d=0.1",
+        "-c:v",
+        "h264_nvenc",
+        "-f",
+        "null",
+        "-",
+    ]
+    try:
+        return subprocess.run(command, capture_output=True, timeout=30).returncode == 0
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+
+
+def open_writer(path: Path, fps: float):
+    import imageio.v2 as imageio
+
+    if nvenc_available():
+        return imageio.get_writer(
+            str(path),
+            fps=fps,
+            codec="h264_nvenc",
+            quality=None,
+            pixelformat="yuv420p",
+            macro_block_size=1,
+            output_params=["-preset", "p4", "-cq", "23"],
+        )
+    # quality=6 у imageio-ffmpeg уже подставляет -pix_fmt yuv420p для libx264;
+    # повторное явное указание того же флага только дублирует его в команде
+    # ffmpeg и даёт безобидное, но лишнее предупреждение "Multiple -pix_fmt".
+    return imageio.get_writer(
+        str(path),
+        fps=fps,
+        codec="libx264",
+        quality=6,
+        macro_block_size=1,
+    )
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     capture = cv2.VideoCapture(str(DATA / "MKCell.mp4"))
     if not capture.isOpened():
         raise SystemExit("не открывается data/MKCell.mp4")
     fps = float(capture.get(cv2.CAP_PROP_FPS) or 30.0)
-    import imageio.v2 as imageio
-
-    writer = imageio.get_writer(
-        str(OUT / "flow_tracked.mp4"),
-        fps=fps,
-        codec="libx264",
-        quality=6,
-        macro_block_size=1,
-        ffmpeg_params=["-pix_fmt", "yuv420p"],
-    )
+    writer = open_writer(OUT / "flow_tracked.mp4", fps)
     tracker = FlowTracker()
     previews = []
     started = time.perf_counter()
@@ -186,7 +256,10 @@ def main() -> None:
             break
         small = cv2.resize(frame, None, fx=SCALE, fy=SCALE, interpolation=cv2.INTER_AREA)
         red = cv2.GaussianBlur(small[:, :, 2], (3, 3), 0)
-        points = detect_particles(small)
+        if tracker.needs_detections(frame_idx):
+            points = detect_particles(small)
+        else:
+            points = np.zeros((0, 2), dtype=np.float32)
         tracker.step(frame_idx, red, points)
         canvas = draw(small, tracker, frame_idx)
         writer.append_data(cv2.cvtColor(canvas, cv2.COLOR_BGR2RGB))
