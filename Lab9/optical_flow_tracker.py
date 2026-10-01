@@ -15,6 +15,9 @@ SCALE = 0.5
 MAX_JUMP = 18.0
 MIN_TRACK = 15
 REFRESH_EVERY = 10
+# Маска тела клетки — самый дорогой шаг (открытие 45x45), а за 5 кадров
+# (1/6 с) клетка меняется меньше, чем маска шумит от кадра к кадру.
+MASK_EVERY = 5
 PREVIEW_FRAMES = {0, 900, 2000, 3500}
 LK_CRITERIA = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 20, 0.03)
 
@@ -38,12 +41,10 @@ def cell_body(blue: np.ndarray) -> np.ndarray:
     return (labels == index).astype(np.uint8)
 
 
-def detect_particles(frame_bgr: np.ndarray) -> np.ndarray:
-    blue, green, red = cv2.split(frame_bgr)
+def detect_particles(frame_bgr: np.ndarray, inside: np.ndarray) -> np.ndarray:
+    _blue, green, red = cv2.split(frame_bgr)
     red_f = red.astype(np.float32)
-    blue_f = blue.astype(np.float32)
     green_f = green.astype(np.float32)
-    inside = cell_body(blue_f).astype(bool)
     if int(inside.sum()) < 500:
         return np.zeros((0, 2), dtype=np.float32)
     highpass = np.clip(red_f - cv2.GaussianBlur(red_f, (0, 0), 1.8), 0, None)
@@ -83,7 +84,7 @@ class FlowTracker:
         self.tracks[track_id] = [(frame_idx, x, y)]
         return track_id
 
-    def step(self, frame_idx: int, red: np.ndarray, detections: np.ndarray) -> None:
+    def step(self, frame_idx: int, red: np.ndarray, detections: np.ndarray, inside: np.ndarray) -> None:
         detections = np.asarray(detections, dtype=np.float32).reshape(-1, 2)
         if self.prev_red is None or self.points is None or len(self.ids) == 0:
             kept = []
@@ -115,6 +116,10 @@ class FlowTracker:
             x, y = float(nxt[index, 0, 0]), float(nxt[index, 0, 1])
             ox, oy = float(self.points[index, 0, 0]), float(self.points[index, 0, 1])
             if not (0 <= x < width and 0 <= y < height):
+                continue
+            # Поток может унести точку с тела клетки на выросты и фон, где
+            # она застревает на неподвижной детали до конца ролика.
+            if not inside[int(y), int(x)]:
                 continue
             if np.hypot(x - ox, y - oy) > MAX_JUMP:
                 continue
@@ -250,17 +255,20 @@ def main() -> None:
     previews = []
     started = time.perf_counter()
     frame_idx = 0
+    inside = None
     while True:
         ok, frame = capture.read()
         if not ok:
             break
         small = cv2.resize(frame, None, fx=SCALE, fy=SCALE, interpolation=cv2.INTER_AREA)
         red = cv2.GaussianBlur(small[:, :, 2], (3, 3), 0)
+        if frame_idx % MASK_EVERY == 0:
+            inside = cell_body(small[:, :, 0].astype(np.float32)).astype(bool)
         if tracker.needs_detections(frame_idx):
-            points = detect_particles(small)
+            points = detect_particles(small, inside)
         else:
             points = np.zeros((0, 2), dtype=np.float32)
-        tracker.step(frame_idx, red, points)
+        tracker.step(frame_idx, red, points, inside)
         canvas = draw(small, tracker, frame_idx)
         writer.append_data(cv2.cvtColor(canvas, cv2.COLOR_BGR2RGB))
         if frame_idx in PREVIEW_FRAMES:
