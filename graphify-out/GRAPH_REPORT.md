@@ -1,7 +1,7 @@
 # Graph Report - Machine_vision_systems  (2026-10-01)
 
 ## Corpus Check
-- 20 files · ~992,664 words
+- 20 files · ~992,786 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `bb82102c`
+- Built from commit: `fff0c2ff`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -38,10 +38,10 @@
 ## God Nodes (most connected - your core abstractions)
 1. `main()` - 9 edges
 2. `FlowTracker` - 8 edges
-3. `Report` - 7 edges
-4. `rotation_study()` - 7 edges
-5. `match_queries()` - 7 edges
-6. `main()` - 7 edges
+3. `main()` - 8 edges
+4. `Report` - 7 edges
+5. `rotation_study()` - 7 edges
+6. `match_queries()` - 7 edges
 7. `main()` - 7 edges
 8. `Практика 5. Особые точки` - 7 edges
 9. `main()` - 6 edges
