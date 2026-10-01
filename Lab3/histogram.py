@@ -47,10 +47,17 @@ def main() -> None:
     cv2.imwrite(str(OUT / "weld_wide.jpg"), wide, [cv2.IMWRITE_JPEG_QUALITY, 92])
     cv2.imwrite(str(OUT / "weld.jpg"), clahe, [cv2.IMWRITE_JPEG_QUALITY, 92])
 
+    # Единичные мёртвые/засвеченные пиксели (0 и 65535) растягивают диапазон
+    # на весь uint16 и прячут настоящее распределение в одну полоску, поэтому
+    # границы графика берутся по широкому окну (0.5-99.5%), а не по min/max.
+    plot_low, plot_high = wide_low, wide_high
+    margin = 0.1 * (plot_high - plot_low)
+
     figure, axes = plt.subplots(1, 2, figsize=(10, 4))
-    axes[0].hist(pixels.ravel(), bins=256, color="0.3")
+    axes[0].hist(pixels.ravel(), bins=256, range=(plot_low, plot_high), color="0.3")
     axes[0].axvline(tight_low, color="C1", label=f"окно {tight_low:.0f}")
     axes[0].axvline(tight_high, color="C1", label=f"{tight_high:.0f}")
+    axes[0].set_xlim(plot_low - margin, plot_high + margin)
     axes[0].set_title("исходные яркости")
     axes[0].legend(fontsize=8)
     axes[1].hist(clahe.ravel(), bins=256, color="0.2")
